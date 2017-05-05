@@ -1,0 +1,6 @@
+<Project>
+  <!-- TODO may not be necessary, depending on https://github.com/dotnet/sdk/issues/1220 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardImplicitPackageVersion)" />
+  </ItemGroup>
+</Project>
