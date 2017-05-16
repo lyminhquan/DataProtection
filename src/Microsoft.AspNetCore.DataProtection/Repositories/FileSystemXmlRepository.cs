@@ -38,8 +38,9 @@ namespace Microsoft.AspNetCore.DataProtection.Repositories
         }
 
         /// <summary>
-        /// The default key storage directory, which currently corresponds to
-        /// "%LOCALAPPDATA%\ASP.NET\DataProtection-Keys".
+        /// The default key storage directory.
+        /// On Windows, this currently corresponds to "Environment.SpecialFolder.LocalApplication/ASP.NET/DataProtection-Keys".
+        /// On Linux and macOS, this currently corresponds to "$HOME/.aspnet/DataProtection-Keys".
         /// </summary>
         /// <remarks>
         /// This property can return null if no suitable default key storage directory can

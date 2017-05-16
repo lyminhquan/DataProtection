@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.DataProtection.Test.Shared;
 using Microsoft.AspNetCore.Testing.xunit;
 using Xunit;
@@ -14,8 +15,7 @@ namespace Microsoft.AspNetCore.DataProtection
 {
     public class DataProtectionProviderTests
     {
-        [ConditionalFact]
-        [ConditionalRunTestOnlyIfLocalAppDataAvailable]
+        [Fact]
         public void System_UsesProvidedDirectory()
         {
             WithUniqueTempDirectory(directory =>
@@ -38,12 +38,13 @@ namespace Microsoft.AspNetCore.DataProtection
             });
         }
 
-        [ConditionalFact]
-        [ConditionalRunTestOnlyIfLocalAppDataAvailable]
+        [Fact]
         public void System_NoKeysDirectoryProvided_UsesDefaultKeysDirectory()
         {
-            var keysPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ASP.NET", "DataProtection-Keys");
-            var tempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ASP.NET", "DataProtection-KeysTemp");
+            Assert.NotNull(FileSystemXmlRepository.DefaultKeyStorageDirectory);
+
+            var keysPath = FileSystemXmlRepository.DefaultKeyStorageDirectory.FullName;
+            var tempPath = FileSystemXmlRepository.DefaultKeyStorageDirectory.FullName + "Temp";
 
             try
             {
@@ -68,6 +69,10 @@ namespace Microsoft.AspNetCore.DataProtection
                     Assert.DoesNotContain("Warning: the key below is in an unencrypted form.", fileText, StringComparison.Ordinal);
                     Assert.Contains("This key is encrypted with Windows DPAPI.", fileText, StringComparison.Ordinal);
                 }
+                else
+                {
+                    Assert.Contains("Warning: the key below is in an unencrypted form.", fileText, StringComparison.Ordinal);
+                }
             }
             finally
             {
@@ -83,7 +88,6 @@ namespace Microsoft.AspNetCore.DataProtection
         }
 
         [ConditionalFact]
-        [ConditionalRunTestOnlyIfLocalAppDataAvailable]
         [ConditionalRunTestOnlyOnWindows]
         public void System_UsesProvidedDirectory_WithConfigurationCallback()
         {
@@ -110,8 +114,7 @@ namespace Microsoft.AspNetCore.DataProtection
             });
         }
 
-        [ConditionalFact]
-        [ConditionalRunTestOnlyIfLocalAppDataAvailable]
+        [Fact]
         public void System_UsesProvidedDirectoryAndCertificate()
         {
             var filePath = Path.Combine(GetTestFilesPath(), "TestCert.pfx");
@@ -171,13 +174,6 @@ namespace Microsoft.AspNetCore.DataProtection
                     dirInfo.Delete(recursive: true);
                 }
             }
-        }
-
-        private class ConditionalRunTestOnlyIfLocalAppDataAvailable : Attribute, ITestCondition
-        {
-            public bool IsMet => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) != null;
-
-            public string SkipReason { get; } = "Environment.SpecialFolder.LocalApplicationData couldn't be located.";
         }
 
         private static string GetTestFilesPath()
