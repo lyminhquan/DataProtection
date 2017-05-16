@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Testing.xunit;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -16,12 +16,16 @@ namespace Microsoft.AspNetCore.DataProtection.Repositories
         [Fact]
         public void DefaultKeyStorageDirectory_Property()
         {
+            var baseDir = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ASP.NET")
+                : Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".aspnet");
+            var expectedDir = new DirectoryInfo(Path.Combine(baseDir, "DataProtection-Keys")).FullName;
+
             // Act
             var defaultDirInfo = FileSystemXmlRepository.DefaultKeyStorageDirectory;
 
             // Assert
-            Assert.Equal(defaultDirInfo.FullName,
-                new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ASP.NET", "DataProtection-Keys")).FullName);
+            Assert.Equal(expectedDir, defaultDirInfo.FullName);
         }
 
         [Fact]

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
@@ -82,23 +83,23 @@ namespace Microsoft.AspNetCore.DataProtection.Repositories
 
         private static DirectoryInfo GetDefaultKeyStorageDirectory()
         {
-            // Environment.GetFolderPath returns null if the user profile isn't loaded.
-            var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (!string.IsNullOrEmpty(folderPath))
-            {
-                return GetKeyStorageDirectoryFromBaseAppDataPath(folderPath);
-            }
-
-            // Fallback to environment variables.
             DirectoryInfo retVal;
 
-            var localAppDataPath = Environment.GetEnvironmentVariable("LOCALAPPDATA");
+            // Environment.GetFolderPath returns null if the user profile isn't loaded.
+            var localAppDataFromSystemPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var localAppDataFromEnvPath = Environment.GetEnvironmentVariable("LOCALAPPDATA");
             var userProfilePath = Environment.GetEnvironmentVariable("USERPROFILE");
             var homePath = Environment.GetEnvironmentVariable("HOME");
 
-            if (localAppDataPath != null)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !string.IsNullOrEmpty(localAppDataFromSystemPath))
             {
-                retVal = GetKeyStorageDirectoryFromBaseAppDataPath(localAppDataPath);
+                // To preserve backwards-compatibility with 1.x, Environment.SpecialFolder.LocalApplicationData
+                // cannot take precedence over $LOCALAPPDATA and $HOME/.aspnet on non-Windows platforms
+                retVal = GetKeyStorageDirectoryFromBaseAppDataPath(localAppDataFromSystemPath);
+            }
+            else if (localAppDataFromEnvPath != null)
+            {
+                retVal = GetKeyStorageDirectoryFromBaseAppDataPath(localAppDataFromEnvPath);
             }
             else if (userProfilePath != null)
             {
@@ -109,6 +110,12 @@ namespace Microsoft.AspNetCore.DataProtection.Repositories
                 // If LOCALAPPDATA and USERPROFILE are not present but HOME is,
                 // it's a good guess that this is a *NIX machine.  Use *NIX conventions for a folder name.
                 retVal = new DirectoryInfo(Path.Combine(homePath, ".aspnet", DataProtectionKeysFolderName));
+            }
+            else if (!string.IsNullOrEmpty(localAppDataFromSystemPath))
+            {
+                // Starting in 2.x, non-Windows platforms may use Environment.SpecialFolder.LocalApplicationData
+                // but only after checking for $LOCALAPPDATA, $USERPROFILE, and $HOME.
+                retVal = GetKeyStorageDirectoryFromBaseAppDataPath(localAppDataFromSystemPath);
             }
             else
             {
