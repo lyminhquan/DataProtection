@@ -24,7 +24,7 @@ namespace Redis
 
             var services = serviceCollection.BuildServiceProvider();
             var loggerFactory = services.GetService<LoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Trace);
+            loggerFactory.AddConsole();
 
             // Run a sample payload
             var protector = services.GetDataProtector("sample-purpose");

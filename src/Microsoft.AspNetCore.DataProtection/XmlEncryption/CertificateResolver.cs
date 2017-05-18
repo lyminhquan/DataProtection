@@ -38,13 +38,16 @@ namespace Microsoft.AspNetCore.DataProtection.XmlEncryption
             var store = new X509Store(location);
             try
             {
-                store.Open(OpenFlags.ReadOnly);
+                store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
                 var matchingCerts = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: true);
-                return (matchingCerts != null && matchingCerts.Count > 0) ? matchingCerts[0] : null;
+                return (matchingCerts != null && matchingCerts.Count > 0)
+                    ? matchingCerts[0]
+                    : null;
             }
             catch (PlatformNotSupportedException)
             {
-                // LocalMachine\My is not supported on Linux yet
+                // LocalMachine\My is not supported on Linux yet and will throw on Open().
+                // See https://github.com/dotnet/corefx/issues/3690.
                 return null;
             }
             finally
