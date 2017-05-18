@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.DataProtection
         private const string OldNamespace = "Microsoft.AspNet.DataProtection";
         private const string CurrentNamespace = "Microsoft.AspNetCore.DataProtection";
         private readonly ILogger _logger;
-        private static readonly Regex _versionPattern = new Regex(@",\s?Version=(\d+\.?)(\d+\.?)?(\d+\.?)?(\d+\.?)?", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
+        private static readonly Regex _versionPattern = new Regex(@",\s?Version=[0-9]+(\.[0-9]+){0,3}", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
 
         public TypeForwardingActivator(IServiceProvider services)
             : this(services, DataProtectionProviderFactory.GetDefaultLoggerFactory())
@@ -40,13 +40,10 @@ namespace Microsoft.AspNetCore.DataProtection
                 forwardedTypeName = originalTypeName.Replace(OldNamespace, CurrentNamespace);
             }
 
-            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Core"))
+            if (candidate || forwardedTypeName.StartsWith(CurrentNamespace + ".", StringComparison.Ordinal))
             {
-                if (candidate || forwardedTypeName.Contains(CurrentNamespace))
-                {
-                    candidate = true;
-                    forwardedTypeName = RemoveVersionFromAssemblyName(forwardedTypeName);
-                }
+                candidate = true;
+                forwardedTypeName = RemoveVersionFromAssemblyName(forwardedTypeName);
             }
 
             if (candidate)
