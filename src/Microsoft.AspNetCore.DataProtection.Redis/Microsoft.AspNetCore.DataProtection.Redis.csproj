@@ -6,7 +6,6 @@
     <Description>Redis storage support as key store.</Description>
     <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>aspnetcore;dataprotection;redis</PackageTags>
@@ -14,6 +13,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.AspNetCore.DataProtection\Microsoft.AspNetCore.DataProtection.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="StackExchange.Redis.StrongName" Version="$(RedisVersion)" />
   </ItemGroup>
 

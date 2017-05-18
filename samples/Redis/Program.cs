@@ -23,7 +23,7 @@ namespace Redis
                 .PersistKeysToRedis(redis, "DataProtection-Keys");
 
             var services = serviceCollection.BuildServiceProvider();
-            var loggerFactory = services.GetService<ILoggerFactory>();
+            var loggerFactory = services.GetService<LoggerFactory>();
             loggerFactory.AddConsole(LogLevel.Trace);
 
             // Run a sample payload
