@@ -4,7 +4,6 @@
     <CoreFxVersion>4.4.0-*</CoreFxVersion>
     <InternalAspNetCoreSdkVersion>2.1.0-*</InternalAspNetCoreSdkVersion>
     <MoqVersion>4.7.1</MoqVersion>
-    <NETStandardImplicitPackageVersion>$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.0-*</NETStandardLibraryNETFrameworkVersion>
     <RedisVersion>1.2.3</RedisVersion>
     <TestSdkVersion>15.3.0-*</TestSdkVersion>
